@@ -2,9 +2,10 @@
 
 ## Structure of project-folder
 project
-- \repo\dsproject_supply_chain
-- \data\ ... tsv-files
-
+- \dsproject_supply_chain\ # location of git repo
+- \data\processed\  # data after pre-processing will be saved here
+- \data\raw\ # raw data
+- \data\processed_model\ # self-trained model including feature matrix will be saved here
 
 ## GITREPO
 ### Link
@@ -14,7 +15,6 @@ https://github.com/LLGH1/dsproject_supply_chain.git
 Everyone has his/her own dev-repo (dev_firstname). Everyone can develop in their own dev-branch. 
 We merge our work into the dev-branch and develop a final version together.
 We push the final version into the main-branch. In the main-branch, we only keep the work which will finally be presented. 
-
 
 ## List of necessary python-packages
 See package-list.txt
