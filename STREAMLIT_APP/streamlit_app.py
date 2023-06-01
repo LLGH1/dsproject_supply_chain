@@ -1,3 +1,5 @@
+#########################################################################
+### define packages used in the app
 import streamlit as st
 import seaborn as sns
 import matplotlib.pyplot as plt
@@ -10,32 +12,75 @@ from sklearn.cluster import KMeans
 from sklearn.model_selection import train_test_split
 
 from util import prepare_data,draw_correlation_with_target, get_score ,get_predictions
+
+import os
+from os.path import dirname
+
+#########################################################################
+### define the project path
+path = dirname(os.getcwd()) # path of the parent folder of repo, where data folder is located
+path_repo = os.getcwd() # path of the repo-folder. STREAMLT_APP is a subfolder of the repo-folder
+
+#########################################################################
+### define side bar > table of content
 st.sidebar.title("Contents")
-pages =["Introduction","Data Exploration and cleaning","Data Visualizations", "Modelling and Intrepretation", "???Interactive part", "Conclusion"]
+pages =["Introduction","Data Exploration and cleansing","Data Visualizations", "Modelling and Intrepretation", "???Interactive part", "Conclusion"]
 page = st.sidebar.radio("Click the page",options = pages)
-df = pd.read_csv("speeddating.csv") # tbd our data
-df_clean = prepare_data(df)
-features_list = ["gender","age","age_o","attractive_o","sinsere_o","funny_o","intelligence_o",
-     "funny_partner","attractive_partner","sincere_partner","intelligence_partner"]
-X_train,X_test,y_train, y_test = train_test_split(df_clean [
-    features_list ],df_clean['match'])
 
-
+#########################################################################
+### Part introduction
 if page == pages[0]: 
     st.title('Supply Chain- Customer Satisfaction')
-    st.subheader("Amazon US Customer Reviews -- Video Games ")
-    st.text("Author: Ipsita Ranjan, Philipp Reber, Sebastian Willutzky, Ling Zhu")
+    st.caption("Amazon US Customer Reviews -- Video Games ")
+    st.caption("Author: Ipsita Ranjan, Philipp Reber, Sebastian Willutzky, Ling Zhu")
     st.text("\n") 
-    st.dataframe(df_clean.head())
+
+    st.subheader("Introduction")
+
+    st.write("The purpose of this study is to investigate how companies can conduct sentiment analysis based on Amazon.com reviews to gain more insights into customer experience. The dataset used in this study is the Amazon US Customer Reviews Dataset. Here is the [link](https://www.kaggle.com/datasets/cynthiarempel/amazon-us-customer-reviews-dataset) towards the original dataset"
+    )
+    st.write("The reviews are split into two parts, there is a star-rating system and customer review text. The star rating system is informative; however, it provides only a quantitative analysis on whether a product is popular or not. The review text provides qualitative information on why the product was popular or not."
+    )
+    st.write("Once a sentiment analysis is completed and a model is trained, companies that sell products on Amazon or sell similar products on other platforms can gain more understanding on top-rated products, what customers value, maintain positive engagement and improve neutral/negative experiences. This can encourage innovative product development and enhanced customer service."
+    )
+    st.write("The objective of this study is to build a model that can predict the star rating of reviews with a high accuracy and thus determine if the review is associated with a positive or negative sentiment. As mentioned above, the study will involve sentiment analysis and the process relies on machine learning (ML) algorithms and natural language processing (NLP)."
+    )
+    st.image(path_repo + "/STREAMLIT_APP/pic/smilelys.jpg") # TBD: error while opening image. needs to be fixed
+
+#########################################################################
+### part Data exploration and cleansing   
+if page  == pages[1]: 
+    st.subheader("Data exploration and cleansing")
+
+    st.write("The dataset used is the Amazon US Customer Reviews found on Kaggle.com [link](https://www.kaggle.com/datasets/cynthiarempel/amazon-us-customer-reviews-dataset). The data is freely available and is public. The content of the dataset is as follows: "
+    )
+    df = pd.read_excel(path_repo + "/STREAMLIT_APP/input/dataexploration_datacolumns.xlsx")
+    st.dataframe(df)
+    st.write("The collection of reviews were written in the Amazon.com marketplace and associated metadata from 1995 until 2015. Examples of products in the dataset include but are not limited to apparel, books, furniture, musical instruments, toys etc. "
+    )
+    st.write("For the purpose of this study, the dataset based on reviews for Hardcopy and Digital videogames were used. It is approximately 1,2 GB in size with 15 columns and 1.924.992 entries."
+    )
+    st.write(":red[placeholder for the head of raw data] ")
+    st.write("The explaining variables are review_headline and review_body since it is the text in these columns that the model will analyse and ultimately draw conclusions from. The target variable is star_rating since it provides a clear output on the sentiment (i.e., positive, neutral, or negative along 5 rating classes) of the review."
+    )
+    # df = pd.read_excel(path + "/data/raw/xxx.csv")
+
+    # df = pd.read_csv(path + "/data/raw/speeddating.csv") # tbd our data
+    # df_clean = prepare_data(df)
+    # features_list = ["gender","age","age_o","attractive_o","sinsere_o","funny_o","intelligence_o",
+    #     "funny_partner","attractive_partner","sincere_partner","intelligence_partner"]
+    # X_train,X_test,y_train, y_test = train_test_split(df_clean [
+    #     features_list ],df_clean['match'])
+    
+    # st.dataframe(df_clean.head())
     # st.image("nouvelle_image.jpg",caption="A cool picture about the dataset")
-    st.video("https://www.youtube.com/watch?v=WKNRM2xVRJo")
-    st.write("The columns' names are",df_clean.columns)
-    st.markdown("Here is the [link](https://www.kaggle.com/datasets/annavictoria/speed-dating-experiment) towards the original dataset")
+    # st.video("https://www.youtube.com/watch?v=WKNRM2xVRJo")
+    # st.write("The columns' names are",df_clean.columns)
+
     st.latex(r'''
     p = \dfrac{1}{1+e^{-{b_{0} + b_{1} \times x }}}
     ''')
 
-if page  == pages[1]: 
    # fig,ax = plt.subplots()
 
     sns.set_theme(style="whitegrid")
@@ -73,8 +118,11 @@ if page  == pages[1]:
     st.write('The current number is ', number_end)
     if number_start < number_end:
         st.pyplot(draw_correlation_with_target(df_clean,nb_features=[number_start,number_end]))
-    
+
+#########################################################################
+### part Visualization    
 if page == pages[2]:
+    st.subheader("Data Visualization")
     model_name =st.selectbox("Choose a ML Model to train",options=["KNN","Logistic Regression","Random Forest"])
     st.write(f"The performance of the ML model is {get_score(model_name,X_train,X_test,y_train,y_test)}")
 
@@ -100,3 +148,19 @@ if page == pages[2]:
             st.error('tough Luck !! You are out, Next !', icon="🚨")
             #st.write(f'The prediction of the ML model is ',pred)
            # st.write( ' "Cogito ergo sum" Descartes')
+
+#########################################################################
+### part Modelling    
+if page == pages[3]:
+    st.subheader("Data Modelling and Interpretation")
+
+
+#########################################################################
+### part interactive part    
+if page == pages[4]:
+    st.subheader("Interactive part")
+
+#########################################################################
+### part conclusion 
+if page == pages[5]:
+    st.subheader("Conclusion")
