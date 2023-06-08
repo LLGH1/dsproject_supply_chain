@@ -24,7 +24,7 @@ path_repo = os.getcwd() # path of the repo-folder. STREAMLT_APP is a subfolder o
 #########################################################################
 ### define side bar > table of content
 st.sidebar.title("Contents")
-pages =["Introduction","Data Exploration and cleansing","Data Visualizations", "Modelling and Intrepretation", "???Interactive part", "Conclusion"]
+pages =["Introduction","Data Exploration and cleansing","Data Visualizations", "Modelling and Intrepretation", "Interactive part - Get the Sentiment", "Conclusion"]
 page = st.sidebar.radio("Click the page",options = pages)
 
 #########################################################################
@@ -45,6 +45,7 @@ if page == pages[0]:
     )
     st.write("The objective of this study is to build a model that can predict the star rating of reviews with a high accuracy and thus determine if the review is associated with a positive or negative sentiment. As mentioned above, the study will involve sentiment analysis and the process relies on machine learning (ML) algorithms and natural language processing (NLP)."
     )
+    #st.write(path_repo)
     st.image(path_repo + "/STREAMLIT_APP/pic/smilelys.jpg") # TBD: error while opening image. needs to be fixed
 
 #########################################################################
@@ -64,7 +65,7 @@ if page  == pages[1]:
     st.write("The explaining variables are review_headline and review_body since it is the text in these columns that the model will analyse and ultimately draw conclusions from. The target variable is star_rating since it provides a clear output on the sentiment (i.e., positive, neutral, or negative along 5 rating classes) of the review."
     )
     # df = pd.read_excel(path + "/data/raw/xxx.csv")
-
+    #streamlit run STREAMLIT_APP\streamlit_app.py
     # df = pd.read_csv(path + "/data/raw/speeddating.csv") # tbd our data
     # df_clean = prepare_data(df)
     # features_list = ["gender","age","age_o","attractive_o","sinsere_o","funny_o","intelligence_o",
@@ -157,8 +158,109 @@ if page == pages[3]:
 
 #########################################################################
 ### part interactive part    
+
+import spacy
+from joblib import dump, load
+from sklearn.feature_extraction.text import CountVectorizer
+import numpy as np
+nlp = spacy.load("en_core_web_lg")
+
+
+
+def lemmatize_and_pos_tag(review):
+    doc = nlp(review)
+    lst = []
+    for tok in doc:
+        if (tok.pos != 97 ) and (tok.pos_ != "SPACE") and (tok.is_alpha or tok.pos_== "PART") and (tok.ent_type_ == ''):
+           lst.append(tok.lemma_ + "_" + tok.pos_)
+    return " ".join(lst)
+
+
 if page == pages[4]:
-    st.subheader("Interactive part")
+    st.subheader("Interactive part - Get the sentiment")
+    st.write("Loading model from "+ path_repo)    
+    try:
+        pipeline=load(path_repo + '\logreg_model.joblib') 
+        st.write("Model loaded")
+        st.write("==============================================================")
+    except:
+        st.write("No model found!")
+        st.write("==============================================================")
+        
+    #df = pd.read_pickle(r"..\data\data_en3.pickle")
+    
+    st.write("Please enter a review below, for which you want sentiment to be detected")
+    input_review = st.text_input("Enter Review here")
+    st.write("==============================================================")
+    if input_review:
+        st.write("You entered: ")
+        st.write(input_review)
+        st.write("==============================================================")
+        st.write("We have seperated the review into tokens, and added a POS Tag:")
+        lpos = lemmatize_and_pos_tag(input_review)
+        st.write(lpos)
+        st.write("==============================================================")
+        st.write(" ")
+        st.write("We will now build n-grams and predict the sentiment")
+        sentiment = pipeline.predict([lpos])
+        st.write("Sentiment class (1 - very bad to 5 - very good): - " + str(sentiment[0]) + " - ")
+        sentiment_p = pipeline.predict_proba([lpos])
+        st.write("Probality for this class: " + str(np.round(100*sentiment_p[0][sentiment[0]-1],1)) + "%")        
+        st.write("==============================================================")
+        st.write("All sentiment class probabilities:")
+        prframe = pd.DataFrame({"Class Probability" : sentiment_p[0]})
+        prframe["Sentiment Class"] = [1,2,3,4,5]
+        
+        st.bar_chart(data=prframe, x= "Sentiment Class", y="Class Probability",  width=0, height=0, use_container_width=True)
+                
+        st.write("==============================================================")
+        st.write("Loading impacting n-grams")
+
+        tok_coef = pd.DataFrame(
+        {
+            "token": pipeline["vect"].get_feature_names_out()
+            , "CTR_Class_1": pipeline["clf"].coef_[0,:]
+            , "CTR_Class_2": pipeline["clf"].coef_[1,:]
+            , "CTR_Class_3": pipeline["clf"].coef_[2,:]
+            , "CTR_Class_4": pipeline["clf"].coef_[3,:]
+            , "CTR_Class_5": pipeline["clf"].coef_[4,:]
+        }
+        )
+        tok_coef = tok_coef.set_index("token")
+        
+        
+        b = CountVectorizer(ngram_range=(1, 3))#pipeline["vect"]
+        b.fit([lpos.lower()])
+        all_toks = b.get_feature_names_out()
+        
+        rel_toks = []
+        for x in all_toks:
+            if x in pipeline["vect"].get_feature_names_out():
+                rel_toks.append(x)
+
+        st.write("Top 10 n-grams with highest impact on sentiment prediction")
+        coefs = tok_coef[["CTR_Class_"+ str(sentiment[0])]].loc[rel_toks]
+        coefs["abs_val"] = np.abs(coefs)
+        coefs=coefs.sort_values(by = "abs_val", ascending=False)
+        st.write(coefs[["CTR_Class_"+ str(sentiment[0])]].head(10))
+      
+        
+        st.write("==============================================================")
+        st.write("Now let's have a look at all individual classes, and which tokens are contributing most to their probabilities")
+        st.write("==============================================================")
+        st.write("Top 10 n-grams for all classes")
+       
+        for x in [1,2,3,4,5]:
+            coefs = tok_coef[["CTR_Class_"+ str(x)]].loc[rel_toks]
+            coefs["abs_val"] = np.abs(coefs)
+            coefs=coefs.sort_values(by = "abs_val", ascending=False)
+            st.write(coefs[["CTR_Class_"+ str(x)]].head(10))
+            #st.write("Probability of this class")
+            st.write(np.sum(coefs[["CTR_Class_"+ str(x)]]))
+            st.write("==============================================================")
+
+
+
 
 #########################################################################
 ### part conclusion 
