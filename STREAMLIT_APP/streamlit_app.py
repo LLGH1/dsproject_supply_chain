@@ -157,9 +157,44 @@ if page == pages[2]:
 #########################################################################
 ### part Modelling    
 if page == pages[3]:
-    st.subheader("Data Modelling and Interpretation")
-    
+    st.subheader("Data Pre-processing, Modelling and Interpretation")
+    st.write("The following base level pre-processing steps were completed during the data analysis stage:")
+    st.write("1. Tokenization")
+    st.write("2. Lower Casing")
+    st.write("3. Removing Punctuation")
+    st.write("4. Standard Stop Words Removal")
+    st.write("To ensure a high performing model, additional pre-processing steps are required. It is important to note that in the upcoming chapters, if the nomenclature states basic pre-processing, the above steps were taken, and if it states advanced pre-processing, the below steps were taken.")
 
+    st.subheader("Stemming and Lemmatization")
+    st.write("Stemming and lemmatization are algorithms used to normalize text and prepare words for further processing. For example, in a review, the model should be able to acknowledge that the words 'like' and 'liked' are the same word in different tenses. Therefore, it is necessary to reduce both words to a common root word, which can be done by stemming or lemmatization. It should be noted that lemmatization is a development of stemming, so it is logical to first preprocess through stemming.")
+    st.write("Stemming removes suffixes from words and provides a word stem. To continue with the above example, the words 'likes', 'likely', and 'liked' all result in the common word stem 'like'. The algorithm used was the snowball stemmer, also known as the Porter2 stemming algorithm.")
+    st.write("Next, words were lemmatized, which is the process of grouping together the different inflected forms of a word so they can be analyzed as a single item. This gives context to the words. Lemmatization is also a prerequisite for POS-Tagging, which will be discussed later. The WordNet Lemmatizer from the Python library was used.")
+
+    st.subheader("Customized Stop Words")
+    st.write("To further simplify the model input and remove excessive noise, the stop words that were removed were customized. Words analyzed through the word cloud (Figure 5.0) were added above and beyond the standard English stop words and subsequently removed.")
+    st.image("customized_stopwords.png", caption="Figure 5.0: Customized Stop Word Cloud")
+
+    st.subheader("POS-Tagging")
+    st.write("Part-of-speech (POS) tagging is a preprocessing technique that refers to categorizing words in a text in correspondence with a particular part of speech. It considers the definition of the word and its context. The POS tags are used to describe the lexical terms in the English language: noun, pronoun, verb, adjective, adverb, preposition, conjunction, and interjection. During the experimental modeling phase, the accuracy of models was compared with and without POS-Tagging to see what kind of impact this pre-processing step has.")
+
+    st.subheader("NER")
+    st.write("Named Entity Recognition (NER) is another form of natural language processing and specifically a subset of artificial intelligence. The NER technique is a two-step process. First, it detects a named entity, and second, it categorizes the entity. This was implemented using the open-source Spacy library.")
+
+    st.subheader("Feature Extraction")
+    st.write("The integral component of this sentiment analysis is that natural language processing requires computers to understand human language. Therefore, it is a prerequisite for the textual data to be converted into a numerical value prior to feeding it into a machine learning model.")
+    st.write("This will be analyzed as a classification problem. Classification is a supervised machine learning method where the method tries to predict the correct label of a given input data. The data used and analyzed above comes with numerical rating data, ranging from 1 to 5. These numerical indicators will be used as labels that represent the sentiment of the review text. Thus, this problem will be viewed as a multi-class classification problem.")
+    st.write("The three feature extraction techniques analyzed were CountVectorizer, TF-IDF, and Word2Vec.")
+
+    st.subheader("CountVectorizer")
+    st.write("CountVectorizer converts a collection of text documents to a matrix of token counts, in other words, it counts the occurrences of tokens in each document. Each unique word is represented by a column of the matrix, and each text sample is a row in the matrix.")
+
+    st.subheader("TF-IDF")
+    st.write("Term Frequency-Inverse Document Frequency (TF-IDF) is a statistical measure that evaluates how relevant a word is to a document in a collection of documents. CountVectorizer simply counts the number of times a word appears in a document, whereas TF-IDF considers not only how many times a word appears in a document but also how important that word is in the whole corpus. Essentially, TF-IDF is an extension of CountVectorizer, and therefore it is a good idea to try both.")
+
+    st.write("Word2Vec")
+    st.write("Word embeddings are words mapped to real numbers of vectors such that it can capture the semantic meanings of the words. TF-IDF does not capture the meaning between the words; it considers the words as separate features.")
+    st.write("Word2Vec was created by a team of researchers led by Tomas Mikilov at Google. It is an unsupervised learning algorithm, and it works by predicting its context words by applying a two-layer neural network. Word2Vec vectors are generated for each review in the train data by traversing the X_train dataset. Prior to vectorizing and training the dataset, the dataset is balanced by undersampling the minority classes. There are two approaches when implementing Word2Vec: there is a pre-trained model, or the model can be self-trained.")
+    st.write("Google published a pre-trained Word2Vec model that is trained with a Google News dataset that is approximately 100 billion words. The model contains 300-dimensional vectors for 3 million words and phrases. The pre-trained model is downloaded and loaded using the gensim package.")
 
     st.subheader("Modelling")
     st.write("The modelling phase was split into two phases.")
