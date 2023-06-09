@@ -158,6 +158,10 @@ if page == pages[2]:
 ### part Modelling    
 if page == pages[3]:
     st.subheader("Data Modelling and Interpretation")
+    
+
+
+    st.subheader("Modelling")
     st.write("The modelling phase was split into two phases.")
     st.write("The first model exploration tested various models with basic pre-processing steps. All pre-processing steps are outlined in Chapter 5.0 in more detail. In summary, the basic pre-processing steps included the following:")
     st.write("1. Tokenization")
@@ -175,11 +179,11 @@ if page == pages[3]:
     st.subheader("Logistic Regression")
     st.write("Logistic regression was the first algorithm tested after the data was vectorized due to cost. In this case, cost is measured by time. Logistic regression tends to be a standard baseline model due to its simplicity and aids in the initial exploratory data analysis. Results shown in the Table 7.0 below for models where advanced pre-processing steps were used, the logistic regression model was already fine-tuned using gridsearch.")
     st.write("Figure 7.0 illustrates the hyperparameters obtained through the gridsearch.")
-    st.image("Gridsearch.png", caption="Figure 7.0: Hyperparameters obtained through gridsearch")
+    st.image("/STREAMLIT_APP/pic/Gridsearch.png", caption="Figure 7.0: Hyperparameters obtained through gridsearch")
     st.write("From the above table, the model that had the highest accuracy score (84%) had 3 classes as opposed to 5 and TF-IDF was used as the feature extraction technique. The advanced pre-processing steps include POS-Tagging was required to develop a strong model. According to the research, Word2Vec should have had strong results as well, however the results are worse than TF-IDF. It is assumed this is because of a lack of training data.")
-    st.image("LR_results.png", caption="Table 7.0: Summary of Logistic Regression Results")
+    st.image("/STREAMLIT_APP/pic/LR_results.png", caption="Table 7.0: Summary of Logistic Regression Results")
     st.write("Figure 7.1 shows this model interpretability. (0 stands for negative/rating 1-2, 1 stands for neutral/rating 3 and 2 stands for positive/rating 4-5).")
-    st.image("best_model_interpretability.png", caption="Figure 7.1: Best model interpretability.")
+    st.image("/STREAMLIT_APP/pic/best_model_interpretability.png", caption="Figure 7.1: Best model interpretability.")
 
     st.subheader("Decision Tree and Random Forest")
     st.write("The two algorithms tested on a CountVectorized dataset with basic pre-processing steps were Decision Tree and Random Forest. Decision tree is a single model that makes predications based on a series of if-then rules and Random Forest is an ensemble learning technique. Unfortunately, due to computational limitations the dataset had to be reduced to 10,000 lines to produce any results. The results were poor at accuracy rates less than 30%.")
@@ -189,7 +193,7 @@ if page == pages[3]:
     st.write("Extreme Gradient Boosting, also known as XG-Boost is a top gradient boosting framework. The algorithm uses regression trees for the base learner and is powerful due to its accuracy, efficiency, and cost. To further leverage the power of XG-Boost the hyperparameters were tuned.")
     st.write("CatBoost is a depth-wise gradient boosting library. It grows a balanced tree using oblivion decision trees. This is a powerful algorithm due to its ability to handle categorical features natively, it reduces parameter tuning time by providing good results with default parameters and it can be used for both regression and classification problems.")
     st.write("Both these algorithms were tested with the basic pre-processing steps and therefore did not include POS-Tagging.")
-    st.image("XG_CB_summary.png", caption="Table 7.2: Summary of XG and Cat Boost Results")
+    st.image("/STREAMLIT_APP/pic/XG_CB_summary.png", caption="Table 7.2: Summary of XG and Cat Boost Results")
 
 
 #########################################################################
