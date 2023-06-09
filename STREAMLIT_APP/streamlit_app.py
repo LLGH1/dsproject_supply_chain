@@ -126,7 +126,7 @@ if page  == pages[1]:
 #########################################################################
 ### part Modelling    
 if page == pages[2]:
-    st.subheader("Data Pre-processing, Modelling and Interpretation")
+    st.header("Data Pre-processing, Modelling and Interpretation")
     st.write("The following base level pre-processing steps were completed during the data analysis stage:")
     st.write("1. Tokenization")
     st.write("2. Lower Casing")
@@ -161,7 +161,7 @@ if page == pages[2]:
     st.subheader("TF-IDF")
     st.write("Term Frequency-Inverse Document Frequency (TF-IDF) is a statistical measure that evaluates how relevant a word is to a document in a collection of documents. CountVectorizer simply counts the number of times a word appears in a document, whereas TF-IDF considers not only how many times a word appears in a document but also how important that word is in the whole corpus. Essentially, TF-IDF is an extension of CountVectorizer, and therefore it is a good idea to try both.")
 
-    st.write("Word2Vec")
+    st.subheader("Word2Vec")
     st.write("Word embeddings are words mapped to real numbers of vectors such that it can capture the semantic meanings of the words. TF-IDF does not capture the meaning between the words; it considers the words as separate features.")
     st.write("Word2Vec was created by a team of researchers led by Tomas Mikilov at Google. It is an unsupervised learning algorithm, and it works by predicting its context words by applying a two-layer neural network. Word2Vec vectors are generated for each review in the train data by traversing the X_train dataset. Prior to vectorizing and training the dataset, the dataset is balanced by undersampling the minority classes. There are two approaches when implementing Word2Vec: there is a pre-trained model, or the model can be self-trained.")
     st.write("Google published a pre-trained Word2Vec model that is trained with a Google News dataset that is approximately 100 billion words. The model contains 300-dimensional vectors for 3 million words and phrases. The pre-trained model is downloaded and loaded using the gensim package.")
