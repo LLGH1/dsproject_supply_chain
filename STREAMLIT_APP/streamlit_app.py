@@ -16,6 +16,8 @@ from util import prepare_data,draw_correlation_with_target, get_score ,get_predi
 import os
 from os.path import dirname
 
+from PIL import Image
+
 #########################################################################
 ### define the project path
 path = dirname(os.getcwd()) # path of the parent folder of repo, where data folder is located
@@ -46,7 +48,9 @@ if page == pages[0]:
     st.write("The objective of this study is to build a model that can predict the star rating of reviews with a high accuracy and thus determine if the review is associated with a positive or negative sentiment. As mentioned above, the study will involve sentiment analysis and the process relies on machine learning (ML) algorithms and natural language processing (NLP)."
     )
     #st.write(path_repo)
-    st.image(path_repo + "/STREAMLIT_APP/pic/smilelys.jpg") # TBD: error while opening image. needs to be fixed
+    
+    image = Image.open(path_repo + "/STREAMLIT_APP/pic/smilelys.jpg")
+    st.image(image) # TBD: error while opening image. needs to be fixed
 
 #########################################################################
 ### part Data exploration and cleansing   
