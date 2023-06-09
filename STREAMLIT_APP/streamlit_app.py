@@ -45,7 +45,6 @@ if page == pages[0]:
     )
     st.write("The objective of this study is to build a model that can predict the star rating of reviews with a high accuracy and thus determine if the review is associated with a positive or negative sentiment. As mentioned above, the study will involve sentiment analysis and the process relies on machine learning (ML) algorithms and natural language processing (NLP)."
     )
-    #st.write(path_repo)
     st.image(path_repo + "/STREAMLIT_APP/pic/smilelys.jpg") # TBD: error while opening image. needs to be fixed
 
 #########################################################################
@@ -65,7 +64,7 @@ if page  == pages[1]:
     st.write("The explaining variables are review_headline and review_body since it is the text in these columns that the model will analyse and ultimately draw conclusions from. The target variable is star_rating since it provides a clear output on the sentiment (i.e., positive, neutral, or negative along 5 rating classes) of the review."
     )
     # df = pd.read_excel(path + "/data/raw/xxx.csv")
-    #streamlit run STREAMLIT_APP\streamlit_app.py
+
     # df = pd.read_csv(path + "/data/raw/speeddating.csv") # tbd our data
     # df_clean = prepare_data(df)
     # features_list = ["gender","age","age_o","attractive_o","sinsere_o","funny_o","intelligence_o",
@@ -105,7 +104,7 @@ if page  == pages[1]:
             data=df_clean)
     sns.despine(offset=10, trim=True)
     st.pyplot(fig)
-    
+
 
     fig3 = plt.figure()
     sns.displot(
@@ -158,7 +157,6 @@ if page == pages[3]:
 
 #########################################################################
 ### part interactive part    
-
 import spacy
 from joblib import dump, load
 from sklearn.feature_extraction.text import CountVectorizer
@@ -258,10 +256,6 @@ if page == pages[4]:
             #st.write("Probability of this class")
             st.write(np.sum(coefs[["CTR_Class_"+ str(x)]]))
             st.write("==============================================================")
-
-
-
-
 #########################################################################
 ### part conclusion 
 if page == pages[5]:
