@@ -172,7 +172,8 @@ if page == pages[3]:
 
     st.subheader("Customized Stop Words")
     st.write("To further simplify the model input and remove excessive noise, the stop words that were removed were customized. Words analyzed through the word cloud (Figure 5.0) were added above and beyond the standard English stop words and subsequently removed.")
-    st.image("/STREAMLIT_APP/pic/customized_stopwords.png", caption="Figure 5.0: Customized Stop Word Cloud")
+    image = Image.open(path_repo + "/STREAMLIT_APP/pic/customized_stopwords.png")
+    st.image(image, caption="Figure 5.0: Customized Stop Word Cloud")
 
     st.subheader("POS-Tagging")
     st.write("Part-of-speech (POS) tagging is a preprocessing technique that refers to categorizing words in a text in correspondence with a particular part of speech. It considers the definition of the word and its context. The POS tags are used to describe the lexical terms in the English language: noun, pronoun, verb, adjective, adverb, preposition, conjunction, and interjection. During the experimental modeling phase, the accuracy of models was compared with and without POS-Tagging to see what kind of impact this pre-processing step has.")
@@ -214,21 +215,26 @@ if page == pages[3]:
     st.subheader("Logistic Regression")
     st.write("Logistic regression was the first algorithm tested after the data was vectorized due to cost. In this case, cost is measured by time. Logistic regression tends to be a standard baseline model due to its simplicity and aids in the initial exploratory data analysis. Results shown in the Table 7.0 below for models where advanced pre-processing steps were used, the logistic regression model was already fine-tuned using gridsearch.")
     st.write("Figure 7.0 illustrates the hyperparameters obtained through the gridsearch.")
-    st.image("/STREAMLIT_APP/pic/Gridsearch.png", caption="Figure 7.0: Hyperparameters obtained through gridsearch")
+    image = Image.open(path_repo +"/STREAMLIT_APP/pic/Gridsearch.png")
+    st.image(image, caption="Figure 7.0: Hyperparameters obtained through gridsearch")
     st.write("From the above table, the model that had the highest accuracy score (84%) had 3 classes as opposed to 5 and TF-IDF was used as the feature extraction technique. The advanced pre-processing steps include POS-Tagging was required to develop a strong model. According to the research, Word2Vec should have had strong results as well, however the results are worse than TF-IDF. It is assumed this is because of a lack of training data.")
-    st.image("/STREAMLIT_APP/pic/LR_results.png", caption="Table 7.0: Summary of Logistic Regression Results")
+    image = Image.open(path_repo +"/STREAMLIT_APP/pic/LR_results.png")
+    st.image(image, caption="Table 7.0: Summary of Logistic Regression Results")
     st.write("Figure 7.1 shows this model interpretability. (0 stands for negative/rating 1-2, 1 stands for neutral/rating 3 and 2 stands for positive/rating 4-5).")
-    st.image("/STREAMLIT_APP/pic/best_model_interpretability.png", caption="Figure 7.1: Best model interpretability.")
+    image = Image.open(path_repo +"/STREAMLIT_APP/pic/best_model_interpretability.png")
+    st.image(image, caption="Figure 7.1: Best model interpretability.")
 
     st.subheader("Decision Tree and Random Forest")
     st.write("The two algorithms tested on a CountVectorized dataset with basic pre-processing steps were Decision Tree and Random Forest. Decision tree is a single model that makes predications based on a series of if-then rules and Random Forest is an ensemble learning technique. Unfortunately, due to computational limitations the dataset had to be reduced to 10,000 lines to produce any results. The results were poor at accuracy rates less than 30%.")
-    st.image("/STREAMLIT_APP/pic/DT_summary.png", caption="Table 7.1: Summary of Decision Tree and Random Forest results")
+    image = Image.open(path_repo +"/STREAMLIT_APP/pic/DT_summary.png")
+    st.image(image, caption="Table 7.1: Summary of Decision Tree and Random Forest results")
 
     st.subheader("XG and Cat Boost")
     st.write("Extreme Gradient Boosting, also known as XG-Boost is a top gradient boosting framework. The algorithm uses regression trees for the base learner and is powerful due to its accuracy, efficiency, and cost. To further leverage the power of XG-Boost the hyperparameters were tuned.")
     st.write("CatBoost is a depth-wise gradient boosting library. It grows a balanced tree using oblivion decision trees. This is a powerful algorithm due to its ability to handle categorical features natively, it reduces parameter tuning time by providing good results with default parameters and it can be used for both regression and classification problems.")
     st.write("Both these algorithms were tested with the basic pre-processing steps and therefore did not include POS-Tagging.")
-    st.image("/STREAMLIT_APP/pic/XG_CB_summary.png", caption="Table 7.2: Summary of XG and Cat Boost Results")
+    image = Image.open(path_repo +"/STREAMLIT_APP/pic/XG_CB_summary.png")
+    st.image(image, caption="Table 7.2: Summary of XG and Cat Boost Results")
 
 
 #########################################################################
