@@ -26,7 +26,7 @@ path_repo = os.getcwd() # path of the repo-folder. STREAMLT_APP is a subfolder o
 #########################################################################
 ### define side bar > table of content
 st.sidebar.title("Contents")
-pages =["Introduction","Data Exploration and cleansing","Data Visualizations", "Modelling and Intrepretation", "Interactive part - Get the Sentiment", "Conclusion"]
+pages =["Introduction","Data Exploration and cleansing", "Modelling and Intrepretation", "Interactive part - Get the Sentiment", "Conclusion"] # "Data Visualizations"
 page = st.sidebar.radio("Click the page",options = pages)
 
 #########################################################################
@@ -37,7 +37,7 @@ if page == pages[0]:
     st.caption("Author: Ipsita Ranjan, Philipp Reber, Sebastian Willutzky, Ling Zhu")
     st.text("\n") 
 
-    st.subheader("Introduction")
+    st.header("Introduction")
 
     st.write("The purpose of this study is to investigate how companies can conduct sentiment analysis based on Amazon.com reviews to gain more insights into customer experience. The dataset used in this study is the Amazon US Customer Reviews Dataset. Here is the [link](https://www.kaggle.com/datasets/cynthiarempel/amazon-us-customer-reviews-dataset) towards the original dataset"
     )
@@ -50,114 +50,83 @@ if page == pages[0]:
     #st.write(path_repo)
     
     image = Image.open(path_repo + "/STREAMLIT_APP/pic/smilelys.jpg")
-    st.image(image) # TBD: error while opening image. needs to be fixed
+    st.image(image)
 
 #########################################################################
 ### part Data exploration and cleansing   
 if page  == pages[1]: 
-    st.subheader("Data exploration and cleansing")
+    st.header("Data exploration and cleansing")
 
+    st.subheader("Explore the raw data")
     st.write("The dataset used is the Amazon US Customer Reviews found on Kaggle.com [link](https://www.kaggle.com/datasets/cynthiarempel/amazon-us-customer-reviews-dataset). The data is freely available and is public. The content of the dataset is as follows: "
     )
     df = pd.read_excel(path_repo + "/STREAMLIT_APP/input/dataexploration_datacolumns.xlsx")
     st.dataframe(df)
     st.write("The collection of reviews were written in the Amazon.com marketplace and associated metadata from 1995 until 2015. Examples of products in the dataset include but are not limited to apparel, books, furniture, musical instruments, toys etc. "
     )
-    st.write("For the purpose of this study, the dataset based on reviews for Hardcopy and Digital videogames were used. It is approximately 1,2 GB in size with 15 columns and 1.924.992 entries."
+    st.write("For the purpose of this study, the dataset based on reviews for Hardcopy and Digital videogames were used. It is approximately 1,2 GB in size with 15 columns and 1.924.992 entries. You can find the first 5 lines of the raw data below: "
     )
-    st.write(":red[placeholder for the head of raw data] ")
+    # data_raw = pd.read_csv(path + '/data/raw/data_raw.csv')
+    # st.dataframe(data_raw.head())
     st.write("The explaining variables are review_headline and review_body since it is the text in these columns that the model will analyse and ultimately draw conclusions from. The target variable is star_rating since it provides a clear output on the sentiment (i.e., positive, neutral, or negative along 5 rating classes) of the review."
     )
-    # df = pd.read_excel(path + "/data/raw/xxx.csv")
-    #streamlit run STREAMLIT_APP\streamlit_app.py
-    # df = pd.read_csv(path + "/data/raw/speeddating.csv") # tbd our data
-    # df_clean = prepare_data(df)
-    # features_list = ["gender","age","age_o","attractive_o","sinsere_o","funny_o","intelligence_o",
-    #     "funny_partner","attractive_partner","sincere_partner","intelligence_partner"]
-    # X_train,X_test,y_train, y_test = train_test_split(df_clean [
-    #     features_list ],df_clean['match'])
+
+    st.subheader("Data cleansing")
+    st.write("There was a low amount of missing data therefore what was found in the dataset was dropped. The column marketplace was dropped since the dataset only included reviews from the US Marketplace therefore deemed irrelevant. The customer_id column had a high number of duplicate entries since a customer with a unique customer id most likely ordered multiple items There were no duplicate entries found in the review_id column since the id is truly unique to the review made. After cleasing, 1.924.825 from 1.924.992 entries are left.")
+
+    # df_clean = pd.read_csv(path + '/data/raw/data_firstclean.csv') # data is not loaded due to long loading time
+
+    # pic "Number of video games & digital video games
+    image = Image.open(path_repo + "/STREAMLIT_APP/pic/fig_no_video_digital_games.jpg")
+    st.image(image)
+
+    # pic "Number of reviews per star rating"
+    image = Image.open(path_repo + "/STREAMLIT_APP/pic/fig_no_reviews_per_rating.jpg")
+    st.image(image)
+
+    # pic "Number of reviews by reivew date"
+    image = Image.open(path_repo + "/STREAMLIT_APP/pic/fig_no_reviews_by_date.jpg")
+    st.image(image)
+
+    st.write("In general, the dataset is imbalanced, since there are more 5 star reviews compared to the other ratings. This could be an issue with the machine learning classifiers since the algorithms expect an equal number of entries/examples per class to perform adequately. ")
+
+    st.subheader("Word Cloud")
     
-    # st.dataframe(df_clean.head())
-    # st.image("nouvelle_image.jpg",caption="A cool picture about the dataset")
-    # st.video("https://www.youtube.com/watch?v=WKNRM2xVRJo")
-    # st.write("The columns' names are",df_clean.columns)
-
-    st.latex(r'''
-    p = \dfrac{1}{1+e^{-{b_{0} + b_{1} \times x }}}
-    ''')
-
-   # fig,ax = plt.subplots()
-
-    sns.set_theme(style="whitegrid")
-
-    # Draw a nested barplot by species and sex
-    g = sns.catplot(
-        data=df_clean, kind="bar",
-        x="gender", y="funny", hue="match",
-    palette="dark", alpha=.6, height=6
-    )
-    g.despine(left=True)
-    g.set_axis_labels("Gender", "Funny ")
-    plt.xticks(rotation=45)
-    g.legend.set_title("Match ? ")
-
-    st.pyplot(g)
-
-    fig,ax = plt.subplots()
-    sns.boxplot(x="gender", y="funny_o",
-            hue="match", palette=["m", "g"],
-            data=df_clean)
-    sns.despine(offset=10, trim=True)
-    st.pyplot(fig)
-    
-
-    fig3 = plt.figure()
-    sns.displot(
-    df, x="age", col="race", row="gender",
-    binwidth=3, height=3, facet_kws=dict(margin_titles=True),
-    )
-    st.pyplot(fig3)
-    number_start = st.number_input('Insert a number for first feature ',0,len(df_clean.columns)-1,1)
-    number_end= st.slider('Number of features?',min_value= int(number_start), max_value=int(len(df_clean.columns)) ,step= 1)
-    st.write('The current number is ', number_start)
-    st.write('The current number is ', number_end)
-    if number_start < number_end:
-        st.pyplot(draw_correlation_with_target(df_clean,nb_features=[number_start,number_end]))
 
 #########################################################################
 ### part Visualization    
-if page == pages[2]:
-    st.subheader("Data Visualization")
-    model_name =st.selectbox("Choose a ML Model to train",options=["KNN","Logistic Regression","Random Forest"])
-    st.write(f"The performance of the ML model is {get_score(model_name,X_train,X_test,y_train,y_test)}")
+# if page == pages[2]:
+#     st.header("Data Visualization")
+#     model_name =st.selectbox("Choose a ML Model to train",options=["KNN","Logistic Regression","Random Forest"])
+#     st.write(f"The performance of the ML model is {get_score(model_name,X_train,X_test,y_train,y_test)}")
 
-    features_range =[list(df_clean[f].unique()) for f in features_list]
-    options ={}
-    for i in range(len(features_list))  : 
-        options[features_list[i]]= st.selectbox(
-        f'What is your {features_list[i]} ?',
-      features_range[i]
-        )
+#     features_range =[list(df_clean[f].unique()) for f in features_list]
+#     options ={}
+#     for i in range(len(features_list))  : 
+#         options[features_list[i]]= st.selectbox(
+#         f'What is your {features_list[i]} ?',
+#       features_range[i]
+#         )
 
-    st.write('You selected:', options)
+#     st.write('You selected:', options)
 
-    inputs = pd.DataFrame(options,index=[1])
-    b =st.button("Click to see your predictions !")
-    if b :
-        pred =get_predictions(model_name,inputs,X_train,y_train)
-        if pred :
+#     inputs = pd.DataFrame(options,index=[1])
+#     b =st.button("Click to see your predictions !")
+#     if b :
+#         pred =get_predictions(model_name,inputs,X_train,y_train)
+#         if pred :
          
-            st.success('Congratulations !! You have suceedeed!', icon="✅")
-           # st.write(f'The prediction of the ML model is ',pred)
-        else :
-            st.error('tough Luck !! You are out, Next !', icon="🚨")
-            #st.write(f'The prediction of the ML model is ',pred)
-           # st.write( ' "Cogito ergo sum" Descartes')
+#             st.success('Congratulations !! You have suceedeed!', icon="✅")
+#            # st.write(f'The prediction of the ML model is ',pred)
+#         else :
+#             st.error('tough Luck !! You are out, Next !', icon="🚨")
+#             #st.write(f'The prediction of the ML model is ',pred)
+#            # st.write( ' "Cogito ergo sum" Descartes')
 
 #########################################################################
 ### part Modelling    
-if page == pages[3]:
-    st.subheader("Data Modelling and Interpretation")
+if page == pages[2]:
+    st.header("Data Modelling and Interpretation")
 
 
 #########################################################################
@@ -180,8 +149,8 @@ def lemmatize_and_pos_tag(review):
     return " ".join(lst)
 
 
-if page == pages[4]:
-    st.subheader("Interactive part - Get the sentiment")
+if page == pages[3]:
+    st.header("Interactive part - Get the sentiment")
     st.write("Loading model from "+ path_repo)    
     try:
         pipeline=load(path_repo + '\logreg_model.joblib') 
@@ -268,5 +237,5 @@ if page == pages[4]:
 
 #########################################################################
 ### part conclusion 
-if page == pages[5]:
-    st.subheader("Conclusion")
+if page == pages[4]:
+    st.header("Conclusion")
