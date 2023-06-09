@@ -172,7 +172,7 @@ if page == pages[3]:
 
     st.subheader("Customized Stop Words")
     st.write("To further simplify the model input and remove excessive noise, the stop words that were removed were customized. Words analyzed through the word cloud (Figure 5.0) were added above and beyond the standard English stop words and subsequently removed.")
-    st.image("customized_stopwords.png", caption="Figure 5.0: Customized Stop Word Cloud")
+    st.image("/STREAMLIT_APP/pic/customized_stopwords.png", caption="Figure 5.0: Customized Stop Word Cloud")
 
     st.subheader("POS-Tagging")
     st.write("Part-of-speech (POS) tagging is a preprocessing technique that refers to categorizing words in a text in correspondence with a particular part of speech. It considers the definition of the word and its context. The POS tags are used to describe the lexical terms in the English language: noun, pronoun, verb, adjective, adverb, preposition, conjunction, and interjection. During the experimental modeling phase, the accuracy of models was compared with and without POS-Tagging to see what kind of impact this pre-processing step has.")
