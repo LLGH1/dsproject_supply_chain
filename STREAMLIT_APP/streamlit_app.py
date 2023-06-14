@@ -3,20 +3,27 @@
 import streamlit as st
 import seaborn as sns
 import matplotlib.pyplot as plt
-
+from datetime import datetime
 import pandas as pd 
+import numpy as np
 from sklearn import metrics
 from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import StandardScaler
 from sklearn.cluster import KMeans
 from sklearn.model_selection import train_test_split
-
+import spacy
+from joblib import dump, load
+from sklearn.feature_extraction.text import CountVectorizer
 from util import prepare_data,draw_correlation_with_target, get_score ,get_predictions
-
+from wordcloud import WordCloud, STOPWORDS, ImageColorGenerator
 import os
 from os.path import dirname
-
 from PIL import Image
+# plotly
+#import plotly.graph_objects as go
+import plotly.express as px
+import plotly.figure_factory as ff
+
 
 #streamlit run STREAMLIT_APP\streamlit_app.py
 #########################################################################
@@ -27,7 +34,7 @@ path_repo = os.getcwd() # path of the repo-folder. STREAMLT_APP is a subfolder o
 #########################################################################
 ### define side bar > table of content
 st.sidebar.title("Contents")
-pages =["Introduction","Data Exploration and cleansing", "Modelling and Intrepretation", "Interactive part - Get the Sentiment", "Conclusion"] # "Data Visualizations"
+pages =["Introduction","Data Exploration and cleansing", "Data Pre-processing, Modelling and Interpretation", "Visualization", "Interactive part - Get the Sentiment", "Conclusion"] # "Data Visualizations"
 page = st.sidebar.radio("Click the page",options = pages)
 
 #########################################################################
@@ -90,81 +97,7 @@ if page  == pages[1]:
     st.image(image)
 
     st.write("In general, the dataset is imbalanced, since there are more 5 star reviews compared to the other ratings. This could be an issue with the machine learning classifiers since the algorithms expect an equal number of entries/examples per class to perform adequately. ")
-
-    ### part plotly
-    from datetime import datetime
-    #import plotly.graph_objects as go
-    import plotly.express as px
-
-    df_in = pd.read_pickle(path + "\data\processed\data_en3.pickle")
-
-    df_in["myear"] = df_in.review_date.apply(lambda x: datetime.strptime(x, "%Y-%m-%d").strftime("%Y-%m"))
-    df_in["star_rating"] = df_in["star_rating"].apply(lambda x: int(x))
-
-    fig = px.line(df_in.groupby(["myear","star_rating"])["review_id"].count().reset_index().sort_values("myear"), x='myear', y="review_id", color="star_rating", title = "Reviews per rating class")
-    st.plotly_chart(fig)
-
-    st.subheader("Word Cloud")
-    from wordcloud import WordCloud, STOPWORDS, ImageColorGenerator
-    processed_review_string = df_in.groupby("star_rating").aggregate({"processed_reviews":lambda x: " ".join(x)})
-    def wc_for_rating(rating):
-        wordcloud = WordCloud(collocations=True).generate(processed_review_string.loc[rating][0][1:5000000].replace("one", "")\
-                                                          .replace("use", "").replace(" br ", " ").replace("car", "").replace("work", "")\
-                                                            .replace("game", "").replace("br", " ").replace("play", " ").replace("control", " ")\
-                                                                .replace("even", " "))
-        # Display the generated image:
-        return wordcloud
-    
-        #plt.imshow(wordcloud, interpolation='bilinear')
-        #plt.axis("off")
-        #plt.show()
-
-    wci = st.text_input("Rating Class base")    
-
-    if wci:
-        fig, ax = plt.subplots(figsize = (12, 8))
-        ax.imshow(wc_for_rating(int(wci)), interpolation = "bilinear")
-        plt.axis("off")
-        st.pyplot(fig)
-
-    wci2 = st.text_input("Rating Class comparison")    
-
-    if wci2:
-        fig, ax = plt.subplots(figsize = (12, 8))
-        ax.imshow(wc_for_rating(int(wci2)), interpolation = "bilinear")
-        plt.axis("off")
-        st.pyplot(fig)
         
-#########################################################################
-### part Visualization    
-# if page == pages[2]:
-#     st.header("Data Visualization")
-#     model_name =st.selectbox("Choose a ML Model to train",options=["KNN","Logistic Regression","Random Forest"])
-#     st.write(f"The performance of the ML model is {get_score(model_name,X_train,X_test,y_train,y_test)}")
-
-#     features_range =[list(df_clean[f].unique()) for f in features_list]
-#     options ={}
-#     for i in range(len(features_list))  : 
-#         options[features_list[i]]= st.selectbox(
-#         f'What is your {features_list[i]} ?',
-#       features_range[i]
-#         )
-
-#     st.write('You selected:', options)
-
-#     inputs = pd.DataFrame(options,index=[1])
-#     b =st.button("Click to see your predictions !")
-#     if b :
-#         pred =get_predictions(model_name,inputs,X_train,y_train)
-#         if pred :
-         
-#             st.success('Congratulations !! You have suceedeed!', icon="✅")
-#            # st.write(f'The prediction of the ML model is ',pred)
-#         else :
-#             st.error('tough Luck !! You are out, Next !', icon="🚨")
-#             #st.write(f'The prediction of the ML model is ',pred)
-#            # st.write( ' "Cogito ergo sum" Descartes')
-
 #########################################################################
 ### part Modelling    
 if page == pages[2]:
@@ -248,16 +181,112 @@ if page == pages[2]:
     st.image(image, caption="Table 7.2: Summary of XG and Cat Boost Results")
 
 #########################################################################
+### part Visualization (plotly)
+if page == pages[3]:
+
+    st.header("Visualization")
+
+    # import data
+    st.write("Loading pre-processed data from "+ path_repo)  
+    try:
+        df_in = pd.read_pickle(path + "\data\processed\data_en3.pickle")
+        df_in = df_in.iloc[0:10000]
+        st.write("Data loaded")
+        st.write("==============================================================")
+    except:
+        st.write("No data found!")
+        st.write("==============================================================")
+   
+    st.subheader("Data exploration after pre-processing")
+    # graph: number of review per rating class
+    df_in["myear"] = df_in.review_date.apply(lambda x: datetime.strptime(x, "%Y-%m-%d").strftime("%Y-%m"))
+    df_in["star_rating"] = df_in["star_rating"].apply(lambda x: int(x))
+
+    fig = px.line(df_in.groupby(["myear","star_rating"])["review_id"].count().reset_index().sort_values("myear"), x='myear', y="review_id", color="star_rating", title = "Reviews per rating class")
+    st.plotly_chart(fig)
+
+    # graph: distribution of word length and rating class
+    # st.write("Loading graph: ")
+    df_in['word_length'] = df_in['lem_pos_ner_rem'].str.split().str.len()
+
+    @st.cache_data
+    def sentiment(row):
+        if row['star_rating'] == 5:
+            return "Positive"
+        elif row['star_rating'] == 1:
+            return "Negative"
+        elif  1 < row['star_rating'] < 5:
+            return "Inbetween"
+        else:
+            return "Undefined"
+
+    st.write("Converting 5 stars rating into 3 groups: ")
+    df_in['star_sentiment'] = df_in.apply(sentiment,axis =1)
+
+    positive = df_in[df_in['star_sentiment']=='Positive']['word_length']
+    negative = df_in[df_in['star_sentiment']=='Negative']['word_length']
+    neutral = df_in[df_in['star_sentiment']=='Inbetween']['word_length']
+    st.write("Finished converting! ")
+
+    histdata = [positive, neutral, negative]
+    # st.dataframe(histdata)
+    group_labels = ['Positifve', 'Neutral', 'Negative']
+
+    # Create distplot with custom bin_size
+    fig = ff.create_distplot(histdata, group_labels, show_hist=False)
+    fig.update_layout(title_text = "Distribution plot of text length and star sentiment")
+    st.plotly_chart(fig)
+    # try:
+    #     st.plotly_chart(fig)          
+    #     st.write("Plotly-graph loaded")
+    #     st.write("==============================================================") 
+    # except:
+    #     st.write("Plotly-graph failed to load!")
+    #     st.write("==============================================================")
+
+    # graph: interactive wordcloud
+    st.subheader("Word Cloud")
+    st.write("Loading graph: ")
+    processed_review_string = df_in.groupby("star_rating").aggregate({"processed_reviews":lambda x: " ".join(x)})
+    def wc_for_rating(rating):
+        wordcloud = WordCloud(collocations=True).generate(processed_review_string.loc[rating][0][1:5000000].replace("one", "")\
+                                                          .replace("use", "").replace(" br ", " ").replace("car", "").replace("work", "")\
+                                                            .replace("game", "").replace("br", " ").replace("play", " ").replace("control", " ")\
+                                                                .replace("even", " "))
+        # Display the generated image:
+        return wordcloud
+    
+        #plt.imshow(wordcloud, interpolation='bilinear')
+        #plt.axis("off")
+        #plt.show()
+
+    wci = st.text_input("Rating Class base")    
+
+    if wci:
+        fig, ax = plt.subplots(figsize = (12, 8))
+        ax.imshow(wc_for_rating(int(wci)), interpolation = "bilinear")
+        plt.axis("off")
+        st.pyplot(fig)
+
+    wci2 = st.text_input("Rating Class comparison")    
+
+    if wci2:
+        fig, ax = plt.subplots(figsize = (12, 8))
+        ax.imshow(wc_for_rating(int(wci2)), interpolation = "bilinear")
+        plt.axis("off")
+        st.pyplot(fig)
+
+#########################################################################
 ### part interactive part    
 
-import spacy
-from joblib import dump, load
-from sklearn.feature_extraction.text import CountVectorizer
-import numpy as np
-nlp = spacy.load("en_core_web_lg")
+@st.cache_data
+def load_spacy(mdl):
+    nlp = spacy.load(mdl)
+    return nlp
 
+nlp = load_spacy("en_core_web_lg")
 
-
+@st.cache_data
 def lemmatize_and_pos_tag(review):
     doc = nlp(review)
     lst = []
@@ -266,31 +295,37 @@ def lemmatize_and_pos_tag(review):
            lst.append(tok.lemma_ + "_" + tok.pos_)
     return " ".join(lst)
 
+@st.cache_data
+def load_pipeline(location):
+    pipeline=load(location)
+    return pipeline
 
-if page == pages[3]:
+if page == pages[4]:
     st.header("Interactive part - Get the sentiment")
+
     st.write("Loading model from "+ path_repo)    
     try:
-        pipeline=load(path_repo + '\logreg_model.joblib') 
+        pipeline = load_pipeline(path_repo + '\logreg_model.joblib')
         st.write("Model loaded")
         st.write("==============================================================")
     except:
         st.write("No model found!")
         st.write("==============================================================")
-        
-    #df = pd.read_pickle(r"..\data\data_en3.pickle")
-    
+
     st.write("Please enter a review below, for which you want sentiment to be detected")
     input_review = st.text_input("Enter Review here")
     st.write("==============================================================")
+
     if input_review:
         st.write("You entered: ")
         st.write(input_review)
         st.write("==============================================================")
+
         st.write("We have seperated the review into tokens, and added a POS Tag:")
         lpos = lemmatize_and_pos_tag(input_review)
         st.write(lpos)
         st.write("==============================================================")
+
         st.write(" ")
         st.write("We will now build n-grams and predict the sentiment")
         sentiment = pipeline.predict([lpos])
@@ -298,32 +333,32 @@ if page == pages[3]:
         sentiment_p = pipeline.predict_proba([lpos])
         st.write("Probality for this class: " + str(np.round(100*sentiment_p[0][sentiment[0]-1],1)) + "%")        
         st.write("==============================================================")
+
         st.write("All sentiment class probabilities:")
         prframe = pd.DataFrame({"Class Probability" : sentiment_p[0]})
         prframe["Sentiment Class"] = [1,2,3,4,5]
-        
-        st.bar_chart(data=prframe, x= "Sentiment Class", y="Class Probability",  width=0, height=0, use_container_width=True)
-                
+        st.bar_chart(data=prframe, x= "Sentiment Class", y="Class Probability",  width=0, height=0, use_container_width=True)              
         st.write("==============================================================")
+        
         st.write("Loading impacting n-grams")
 
         tok_coef = pd.DataFrame(
-        {
-            "token": pipeline["vect"].get_feature_names_out()
-            , "CTR_Class_1": pipeline["clf"].coef_[0,:]
-            , "CTR_Class_2": pipeline["clf"].coef_[1,:]
-            , "CTR_Class_3": pipeline["clf"].coef_[2,:]
-            , "CTR_Class_4": pipeline["clf"].coef_[3,:]
-            , "CTR_Class_5": pipeline["clf"].coef_[4,:]
-        }
+            {
+                "token": pipeline["vect"].get_feature_names_out()
+                , "CTR_Class_1": pipeline["clf"].coef_[0,:]
+                , "CTR_Class_2": pipeline["clf"].coef_[1,:]
+                , "CTR_Class_3": pipeline["clf"].coef_[2,:]
+                , "CTR_Class_4": pipeline["clf"].coef_[3,:]
+                , "CTR_Class_5": pipeline["clf"].coef_[4,:]
+            }
         )
+
         tok_coef = tok_coef.set_index("token")
-        
-        
+
         b = CountVectorizer(ngram_range=(1, 3))#pipeline["vect"]
         b.fit([lpos.lower()])
         all_toks = b.get_feature_names_out()
-        
+
         rel_toks = []
         for x in all_toks:
             if x in pipeline["vect"].get_feature_names_out():
@@ -332,15 +367,15 @@ if page == pages[3]:
         st.write("Top 10 n-grams with highest impact on sentiment prediction")
         coefs = tok_coef[["CTR_Class_"+ str(sentiment[0])]].loc[rel_toks]
         coefs["abs_val"] = np.abs(coefs)
+
         coefs=coefs.sort_values(by = "abs_val", ascending=False)
         st.write(coefs[["CTR_Class_"+ str(sentiment[0])]].head(10))
-      
-        
+
         st.write("==============================================================")
         st.write("Now let's have a look at all individual classes, and which tokens are contributing most to their probabilities")
         st.write("==============================================================")
         st.write("Top 10 n-grams for all classes")
-       
+
         for x in [1,2,3,4,5]:
             coefs = tok_coef[["CTR_Class_"+ str(x)]].loc[rel_toks]
             coefs["abs_val"] = np.abs(coefs)
@@ -350,10 +385,12 @@ if page == pages[3]:
             st.write(np.sum(coefs[["CTR_Class_"+ str(x)]]))
             st.write("==============================================================")
 
-
-
-
-#########################################################################
+###########################################################
 ### part conclusion 
 if page == pages[4]:
     st.header("Conclusion")
+    st.write("This sentiment analysis projects’ most significant constraint was computational power. This limitation affected all members of the team. Since the modelling portion of the project was so computationally expensive, the dataset had to be significantly reduced. This reduction affected the accuracy of the models analyzed. ")
+
+    st.write("Other challenges in a sentiment analysis are tone and polarity. Tone is difficult interpret and with large amounts of data, it can be difficult to differentiate objective and subjective tone. Polarity was also a challenge when analyzing the reviews. Words such as “love” and “hate” are clear in their intention, however a statement such as “not so bad” is harder to determine whether it is a positive or negative review.")
+
+    st.write("The final challenge was the dataset itself. Amazon reviews is a five-star system and the multiclassification approach needed a complex pre-processing method and required a neutral label as well. Therefore, to simplify the problem, the labels were recoded, this changed the scope of the project. After reencoding the 5 starts labels into positive, negative and neutral, the results get improved. ")
