@@ -18,6 +18,7 @@ from os.path import dirname
 
 from PIL import Image
 
+#streamlit run STREAMLIT_APP\streamlit_app.py
 #########################################################################
 ### define the project path
 path = dirname(os.getcwd()) # path of the parent folder of repo, where data folder is located
@@ -72,7 +73,7 @@ if page  == pages[1]:
     )
 
     st.subheader("Data cleansing")
-    st.write("There was a low amount of missing data therefore what was found in the dataset was dropped. The column marketplace was dropped since the dataset only included reviews from the US Marketplace therefore deemed irrelevant. The customer_id column had a high number of duplicate entries since a customer with a unique customer id most likely ordered multiple items There were no duplicate entries found in the review_id column since the id is truly unique to the review made. After cleasing, 1.924.825 from 1.924.992 entries are left.")
+    st.write("There was a low amount of missing data therefore what was found in the dataset was dropped. The column marketplace was dropped since the dataset only included reviews from the US Marketplace therefore deemed irrelevant. The customer_id column had a high number of duplicate entries since a customer with a unique customer id most likely ordered multiple items There were no duplicate entries found in the review_id column since the id is truly unique to the review made. After cleansing, 1.924.825 from 1.924.992 entries are left.")
 
     # df_clean = pd.read_csv(path + '/data/raw/data_firstclean.csv') # data is not loaded due to long loading time
 
@@ -90,9 +91,50 @@ if page  == pages[1]:
 
     st.write("In general, the dataset is imbalanced, since there are more 5 star reviews compared to the other ratings. This could be an issue with the machine learning classifiers since the algorithms expect an equal number of entries/examples per class to perform adequately. ")
 
+    ### part plotly
+    from datetime import datetime
+    #import plotly.graph_objects as go
+    import plotly.express as px
+
+    df_in = pd.read_pickle(path + "\data\processed\data_en3.pickle")
+
+    df_in["myear"] = df_in.review_date.apply(lambda x: datetime.strptime(x, "%Y-%m-%d").strftime("%Y-%m"))
+    df_in["star_rating"] = df_in["star_rating"].apply(lambda x: int(x))
+
+    fig = px.line(df_in.groupby(["myear","star_rating"])["review_id"].count().reset_index().sort_values("myear"), x='myear', y="review_id", color="star_rating", title = "Reviews per rating class")
+    st.plotly_chart(fig)
+
     st.subheader("Word Cloud")
+    from wordcloud import WordCloud, STOPWORDS, ImageColorGenerator
+    processed_review_string = df_in.groupby("star_rating").aggregate({"processed_reviews":lambda x: " ".join(x)})
+    def wc_for_rating(rating):
+        wordcloud = WordCloud(collocations=True).generate(processed_review_string.loc[rating][0][1:5000000].replace("one", "")\
+                                                          .replace("use", "").replace(" br ", " ").replace("car", "").replace("work", "")\
+                                                            .replace("game", "").replace("br", " ").replace("play", " ").replace("control", " ")\
+                                                                .replace("even", " "))
+        # Display the generated image:
+        return wordcloud
+    
+        #plt.imshow(wordcloud, interpolation='bilinear')
+        #plt.axis("off")
+        #plt.show()
 
+    wci = st.text_input("Rating Class base")    
 
+    if wci:
+        fig, ax = plt.subplots(figsize = (12, 8))
+        ax.imshow(wc_for_rating(int(wci)), interpolation = "bilinear")
+        plt.axis("off")
+        st.pyplot(fig)
+
+    wci2 = st.text_input("Rating Class comparison")    
+
+    if wci2:
+        fig, ax = plt.subplots(figsize = (12, 8))
+        ax.imshow(wc_for_rating(int(wci2)), interpolation = "bilinear")
+        plt.axis("off")
+        st.pyplot(fig)
+        
 #########################################################################
 ### part Visualization    
 # if page == pages[2]:
