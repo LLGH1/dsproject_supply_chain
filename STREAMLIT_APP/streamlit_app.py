@@ -185,7 +185,7 @@ if page == pages[2]:
     
     st.subheader("N-Gram Analysis")
     st.write("For every n-gram in the vocabulary, the absolute value of the difference of the corresponding coefficients of the best and the worst class was considered to identify the most important n-grams. The resulting n-grams intuitively are very reasonable. Figure 8.0 a & b outline the most positive and negative words.")
-    image = image.open(path_repo +"/STREAMLIT_APP/pic/important_words.png")
+    image = Image.open(path_repo +"/STREAMLIT_APP/pic/important_words.png")
     st.image(image, caption="Figure 8.0a: Most important positive words - Figure 8.0b: Most important negative words")
 
     st.subheader("SHAP analysis")
@@ -193,8 +193,8 @@ if page == pages[2]:
     st.write("1. Global Interpretability: the collective SHAP values can show how much each predictor contributes, either positively or negatively, to the target variable. This is like the variable importance plot, but it can show the positive or negative relationship for each variable with the target.")
     st.write("2. Local Interpretability: each observation gets its own set of SHAP values. This greatly increases its transparency. This explains why a case receives its prediction and the contributions of the predictors. Traditional variable importance algorithms only show the results across the entire population but not on each individual case. The local interpretability enables us to pinpoint and contrast the impacts of the factors")
     st. write("The best and worst predictions are illustrated the figures below.")
-    image = image.open(path_repo +"/STREAMLIT_APP/pic/SHAP.png")
-    st.image(image, caption="Figure 8.1a: Predicted 5, true 1 - Figure 8.1b: Predicted 1, true 5 - Figure 8.1c: Predicted 1, true 1")
+    image = Image.open(path_repo +"/STREAMLIT_APP/pic/SHAP.png")
+    st.image(image)
 
 
 #########################################################################
