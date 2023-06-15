@@ -189,7 +189,7 @@ if page == pages[3]:
     # import data
     st.write("Loading pre-processed data from "+ path_repo)  
     try:
-        df_in = pd.read_pickle(path + "\data\processed\data_en3.pickle")
+        df_in = pd.read_pickle(path + "\data\processed\data_en3_3sentiments.pickle")
         df_in = df_in.iloc[0:10000]
         st.write("Data loaded")
         st.write("==============================================================")
@@ -211,11 +211,11 @@ if page == pages[3]:
 
     @st.cache_data
     def sentiment(row):
-        if row['star_rating'] == 5:
+        if (row['star_rating'] == 5) | (row['star_rating'] == 4):
             return "Positive"
-        elif row['star_rating'] == 1:
+        elif (row['star_rating'] == 1) | (row['star_rating'] == 2):
             return "Negative"
-        elif  1 < row['star_rating'] < 5:
+        elif row['star_rating'] == 3:
             return "Inbetween"
         else:
             return "Undefined"
