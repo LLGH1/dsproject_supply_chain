@@ -207,7 +207,7 @@ if page == pages[3]:
     st.write("Loading pre-processed data from "+ path_repo)  
     try:
         df_in = pd.read_pickle(path + "\data\processed\data_en3_3sentiments.pickle")
-        df_in = df_in.iloc[0:10000]
+        df_in = df_in.sample(frac=0.1)
         st.write("Data loaded")
         st.write("==============================================================")
     except:
@@ -216,6 +216,7 @@ if page == pages[3]:
    
     st.subheader("Data exploration after pre-processing")
     # graph: number of review per rating class
+    st.write("Loading graph Distribution number of reviews per rating class by time: ")
     df_in["myear"] = df_in.review_date.apply(lambda x: datetime.strptime(x, "%Y-%m-%d").strftime("%Y-%m"))
     df_in["star_rating"] = df_in["star_rating"].apply(lambda x: int(x))
 
@@ -223,36 +224,31 @@ if page == pages[3]:
     st.plotly_chart(fig)
 
     # graph: distribution of word length and rating class
-    # st.write("Loading graph: ")
-    df_in['word_length'] = df_in['lem_pos_ner_rem'].str.split().str.len()
-
-    @st.cache_data
-    def sentiment(row):
-        if (row['star_rating'] == 5) | (row['star_rating'] == 4):
-            return "Positive"
-        elif (row['star_rating'] == 1) | (row['star_rating'] == 2):
-            return "Negative"
-        elif row['star_rating'] == 3:
-            return "Inbetween"
-        else:
-            return "Undefined"
-
-    st.write("Converting 5 stars rating into 3 groups: ")
-    df_in['star_sentiment'] = df_in.apply(sentiment,axis =1)
-
+    st.write("Loading graph Distribution of word length and rating class: ")
     positive = df_in[df_in['star_sentiment']=='Positive']['word_length']
     negative = df_in[df_in['star_sentiment']=='Negative']['word_length']
     neutral = df_in[df_in['star_sentiment']=='Inbetween']['word_length']
-    st.write("Finished converting! ")
 
     histdata = [positive, neutral, negative]
     # st.dataframe(histdata)
-    group_labels = ['Positifve', 'Neutral', 'Negative']
+    group_labels = ['Positive', 'Neutral', 'Negative']
 
     # Create distplot with custom bin_size
-    fig = ff.create_distplot(histdata, group_labels, show_hist=False)
-    fig.update_layout(title_text = "Distribution plot of text length and star sentiment")
+    fig = ff.create_distplot(histdata, group_labels) # , show_hist=False
+    fig.update_layout(title_text = "Distribution plot of text length and star sentiments")
     st.plotly_chart(fig)
+
+    class_1 = df_in[df_in['star_rating']==1]['word_length']
+    class_2 = df_in[df_in['star_rating']==2]['word_length']
+    class_3 = df_in[df_in['star_rating']==3]['word_length']
+    class_4 = df_in[df_in['star_rating']==4]['word_length']
+    class_5 = df_in[df_in['star_rating']==5]['word_length']
+
+    histdata2 = [class_1, class_2, class_3, class_4, class_5]
+    group_labels2 = ['1', '2', '3', '4', '5']
+    fig2 = ff.create_distplot(histdata2, group_labels2) # , show_hist=False
+    fig2.update_layout(title_text = "Distribution plot of text length and star ratings")
+    st.plotly_chart(fig2)
     # try:
     #     st.plotly_chart(fig)          
     #     st.write("Plotly-graph loaded")
@@ -263,7 +259,7 @@ if page == pages[3]:
 
     # graph: interactive wordcloud
     st.subheader("Word Cloud")
-    st.write("Loading graph: ")
+    st.write("Loading graph word cloud: ")
     processed_review_string = df_in.groupby("star_rating").aggregate({"processed_reviews":lambda x: " ".join(x)})
     def wc_for_rating(rating):
         wordcloud = WordCloud(collocations=True).generate(processed_review_string.loc[rating][0][1:5000000].replace("one", "")\
