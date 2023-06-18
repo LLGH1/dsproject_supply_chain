@@ -97,7 +97,100 @@ if page  == pages[1]:
     st.image(image)
 
     st.write("In general, the dataset is imbalanced, since there are more 5 star reviews compared to the other ratings. This could be an issue with the machine learning classifiers since the algorithms expect an equal number of entries/examples per class to perform adequately. ")
-        
+
+#########################################################################
+### part Visualization (plotly)
+if page == pages[2]:
+
+    st.header("Visualization")
+
+    # import data
+    st.write("Loading pre-processed data from "+ path_repo)  
+    try:
+        df_in = pd.read_pickle(path + "\data\processed\data_en3_3sentiments.pickle")
+        df_in = df_in.sample(frac=0.01)
+        st.write("Data loaded")
+        st.write("==============================================================")
+    except:
+        st.write("No data found!")
+        st.write("==============================================================")
+   
+    st.subheader("Data exploration after pre-processing")
+    # graph: number of review per rating class
+    st.write("Loading graph Distribution number of reviews per rating class by time: ")
+    df_in["myear"] = df_in.review_date.apply(lambda x: datetime.strptime(x, "%Y-%m-%d").strftime("%Y-%m"))
+    df_in["star_rating"] = df_in["star_rating"].apply(lambda x: int(x))
+
+    # to do: the legend of star rating needs to be sorted
+    fig = px.line(df_in.groupby(["myear","star_rating"])["review_id"].count().reset_index().sort_values("myear"), x='myear', y="review_id", color="star_rating", title = "Reviews per rating class")
+    st.plotly_chart(fig)
+
+    # graph: distribution of word length and rating class
+    st.write("Loading graph Distribution of word length and rating class: ")
+    positive = df_in[df_in['star_sentiment']=='Positive']['word_length']
+    negative = df_in[df_in['star_sentiment']=='Negative']['word_length']
+    neutral = df_in[df_in['star_sentiment']=='Inbetween']['word_length']
+
+    histdata = [positive, neutral, negative]
+    # st.dataframe(histdata)
+    group_labels = ['Positive', 'Neutral', 'Negative']
+
+    # Create distplot with custom bin_size
+    fig = ff.create_distplot(histdata, group_labels, bin_size = 200) # , show_hist=False
+    fig.update_layout(title_text = "Distribution plot of text length and star sentiments")
+    st.plotly_chart(fig)
+
+    class_1 = df_in[df_in['star_rating']==1]['word_length']
+    class_2 = df_in[df_in['star_rating']==2]['word_length']
+    class_3 = df_in[df_in['star_rating']==3]['word_length']
+    class_4 = df_in[df_in['star_rating']==4]['word_length']
+    class_5 = df_in[df_in['star_rating']==5]['word_length']
+
+    histdata2 = [class_1, class_2, class_3, class_4, class_5]
+    group_labels2 = ['1', '2', '3', '4', '5']
+    fig2 = ff.create_distplot(histdata2, group_labels2) # , show_hist=False
+    fig2.update_layout(title_text = "Distribution plot of text length and star ratings")
+    st.plotly_chart(fig2)
+    # try:
+    #     st.plotly_chart(fig)          
+    #     st.write("Plotly-graph loaded")
+    #     st.write("==============================================================") 
+    # except:
+    #     st.write("Plotly-graph failed to load!")
+    #     st.write("==============================================================")
+
+    # graph: interactive wordcloud
+    st.subheader("Word Cloud")
+    st.write("Loading graph word cloud: ")
+    processed_review_string = df_in.groupby("star_rating").aggregate({"processed_reviews":lambda x: " ".join(x)})
+    def wc_for_rating(rating):
+        wordcloud = WordCloud(collocations=True).generate(processed_review_string.loc[rating][0][1:5000000].replace("one", "")\
+                                                          .replace("use", "").replace(" br ", " ").replace("car", "").replace("work", "")\
+                                                            .replace("game", "").replace("br", " ").replace("play", " ").replace("control", " ")\
+                                                                .replace("even", " "))
+        # Display the generated image:
+        return wordcloud
+    
+        #plt.imshow(wordcloud, interpolation='bilinear')
+        #plt.axis("off")
+        #plt.show()
+
+    wci = st.text_input("Rating Class base")    
+
+    if wci:
+        fig, ax = plt.subplots(figsize = (12, 8))
+        ax.imshow(wc_for_rating(int(wci)), interpolation = "bilinear")
+        plt.axis("off")
+        st.pyplot(fig)
+
+    wci2 = st.text_input("Rating Class comparison")    
+
+    if wci2:
+        fig, ax = plt.subplots(figsize = (12, 8))
+        ax.imshow(wc_for_rating(int(wci2)), interpolation = "bilinear")
+        plt.axis("off")
+        st.pyplot(fig)
+
 #########################################################################
 ### part Modelling    
 if page == pages[3]:
@@ -197,104 +290,8 @@ if page == pages[3]:
     st.image(image)
 
 
-#########################################################################
-### part Visualization (plotly)
-if page == pages[2]:
-
-    st.header("Visualization")
-
-    # import data
-    st.write("Loading pre-processed data from "+ path_repo)  
-    try:
-        df_in = pd.read_pickle(path + "\data\processed\data_en3_3sentiments.pickle")
-        df_in = df_in.sample(frac=0.01)
-        st.write("Data loaded")
-        st.write("==============================================================")
-    except:
-        st.write("No data found!")
-        st.write("==============================================================")
-   
-    st.subheader("Data exploration after pre-processing")
-    # graph: number of review per rating class
-    st.write("Loading graph Distribution number of reviews per rating class by time: ")
-    df_in["myear"] = df_in.review_date.apply(lambda x: datetime.strptime(x, "%Y-%m-%d").strftime("%Y-%m"))
-    df_in["star_rating"] = df_in["star_rating"].apply(lambda x: int(x))
-
-    # to do: the legend of star rating needs to be sorted
-    fig = px.line(df_in.groupby(["myear","star_rating"])["review_id"].count().reset_index().sort_values("myear"), x='myear', y="review_id", color="star_rating", title = "Reviews per rating class")
-    st.plotly_chart(fig)
-
-    # graph: distribution of word length and rating class
-    st.write("Loading graph Distribution of word length and rating class: ")
-    positive = df_in[df_in['star_sentiment']=='Positive']['word_length']
-    negative = df_in[df_in['star_sentiment']=='Negative']['word_length']
-    neutral = df_in[df_in['star_sentiment']=='Inbetween']['word_length']
-
-    histdata = [positive, neutral, negative]
-    # st.dataframe(histdata)
-    group_labels = ['Positive', 'Neutral', 'Negative']
-
-    # Create distplot with custom bin_size
-    fig = ff.create_distplot(histdata, group_labels, bin_size = 200) # , show_hist=False
-    fig.update_layout(title_text = "Distribution plot of text length and star sentiments")
-    st.plotly_chart(fig)
-
-    class_1 = df_in[df_in['star_rating']==1]['word_length']
-    class_2 = df_in[df_in['star_rating']==2]['word_length']
-    class_3 = df_in[df_in['star_rating']==3]['word_length']
-    class_4 = df_in[df_in['star_rating']==4]['word_length']
-    class_5 = df_in[df_in['star_rating']==5]['word_length']
-
-    histdata2 = [class_1, class_2, class_3, class_4, class_5]
-    group_labels2 = ['1', '2', '3', '4', '5']
-    fig2 = ff.create_distplot(histdata2, group_labels2) # , show_hist=False
-    fig2.update_layout(title_text = "Distribution plot of text length and star ratings")
-    st.plotly_chart(fig2)
-    # try:
-    #     st.plotly_chart(fig)          
-    #     st.write("Plotly-graph loaded")
-    #     st.write("==============================================================") 
-    # except:
-    #     st.write("Plotly-graph failed to load!")
-    #     st.write("==============================================================")
-
-    # graph: interactive wordcloud
-    st.subheader("Word Cloud")
-    st.write("Loading graph word cloud: ")
-    processed_review_string = df_in.groupby("star_rating").aggregate({"processed_reviews":lambda x: " ".join(x)})
-    def wc_for_rating(rating):
-        wordcloud = WordCloud(collocations=True).generate(processed_review_string.loc[rating][0][1:5000000].replace("one", "")\
-                                                          .replace("use", "").replace(" br ", " ").replace("car", "").replace("work", "")\
-                                                            .replace("game", "").replace("br", " ").replace("play", " ").replace("control", " ")\
-                                                                .replace("even", " "))
-        # Display the generated image:
-        return wordcloud
-    
-        #plt.imshow(wordcloud, interpolation='bilinear')
-        #plt.axis("off")
-        #plt.show()
-
-    wci = st.text_input("Rating Class base")    
-
-    if wci:
-        fig, ax = plt.subplots(figsize = (12, 8))
-        ax.imshow(wc_for_rating(int(wci)), interpolation = "bilinear")
-        plt.axis("off")
-        st.pyplot(fig)
-
-    wci2 = st.text_input("Rating Class comparison")    
-
-    if wci2:
-        fig, ax = plt.subplots(figsize = (12, 8))
-        ax.imshow(wc_for_rating(int(wci2)), interpolation = "bilinear")
-        plt.axis("off")
-        st.pyplot(fig)
 
 #########################################################################
-### part interactive part    
-
-#########################################################################
-
 ### part interactive part    
 @st.cache_data
 def load_spacy(mdl):
