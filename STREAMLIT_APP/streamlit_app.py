@@ -34,7 +34,7 @@ path_repo = os.getcwd() # path of the repo-folder. STREAMLT_APP is a subfolder o
 #########################################################################
 ### define side bar > table of content
 st.sidebar.title("Contents")
-pages =["Introduction","Data Exploration and cleansing", "Data Pre-processing, Modelling and Interpretation", "Visualization", "Interactive part - Get the Sentiment", "Conclusion"] # "Data Visualizations"
+pages =["Introduction","Data Exploration and cleansing", "Visualization", "Modelling and Interpretation",  "Interactive part - Get the Sentiment", "Conclusion"] # "Data Visualizations"
 page = st.sidebar.radio("Click the page",options = pages)
 
 #########################################################################
@@ -100,7 +100,7 @@ if page  == pages[1]:
         
 #########################################################################
 ### part Modelling    
-if page == pages[2]:
+if page == pages[3]:
     st.header("Data Pre-processing, Modelling and Interpretation")
     st.write("The following base level pre-processing steps were completed during the data analysis stage:")
     st.write("1. Tokenization")
@@ -199,7 +199,7 @@ if page == pages[2]:
 
 #########################################################################
 ### part Visualization (plotly)
-if page == pages[3]:
+if page == pages[2]:
 
     st.header("Visualization")
 
