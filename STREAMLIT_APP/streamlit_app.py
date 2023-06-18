@@ -207,7 +207,7 @@ if page == pages[3]:
     st.write("Loading pre-processed data from "+ path_repo)  
     try:
         df_in = pd.read_pickle(path + "\data\processed\data_en3_3sentiments.pickle")
-        df_in = df_in.sample(frac=0.1)
+        df_in = df_in.sample(frac=0.01)
         st.write("Data loaded")
         st.write("==============================================================")
     except:
@@ -220,6 +220,7 @@ if page == pages[3]:
     df_in["myear"] = df_in.review_date.apply(lambda x: datetime.strptime(x, "%Y-%m-%d").strftime("%Y-%m"))
     df_in["star_rating"] = df_in["star_rating"].apply(lambda x: int(x))
 
+    # to do: the legend of star rating needs to be sorted
     fig = px.line(df_in.groupby(["myear","star_rating"])["review_id"].count().reset_index().sort_values("myear"), x='myear', y="review_id", color="star_rating", title = "Reviews per rating class")
     st.plotly_chart(fig)
 
@@ -234,7 +235,7 @@ if page == pages[3]:
     group_labels = ['Positive', 'Neutral', 'Negative']
 
     # Create distplot with custom bin_size
-    fig = ff.create_distplot(histdata, group_labels) # , show_hist=False
+    fig = ff.create_distplot(histdata, group_labels, bin_size = 200) # , show_hist=False
     fig.update_layout(title_text = "Distribution plot of text length and star sentiments")
     st.plotly_chart(fig)
 
@@ -292,6 +293,9 @@ if page == pages[3]:
 #########################################################################
 ### part interactive part    
 
+#########################################################################
+
+### part interactive part    
 @st.cache_data
 def load_spacy(mdl):
     nlp = spacy.load(mdl)
@@ -315,8 +319,8 @@ def load_pipeline(location):
 
 if page == pages[4]:
     st.header("Interactive part - Get the sentiment")
-
     st.write("Loading model from "+ path_repo)    
+
     try:
         pipeline = load_pipeline(path_repo + '\logreg_model.joblib')
         st.write("Model loaded")
@@ -325,36 +329,41 @@ if page == pages[4]:
         st.write("No model found!")
         st.write("==============================================================")
 
-    st.write("Please enter a review below, for which you want sentiment to be detected")
+    st.markdown("**Please enter a review below, for which you want sentiment to be detected**")
+    st.write("___________________________")
     input_review = st.text_input("Enter Review here")
     st.write("==============================================================")
 
     if input_review:
-        st.write("You entered: ")
+        st.write("You entered:")
+        #st.write("___________________________")
         st.write(input_review)
         st.write("==============================================================")
 
-        st.write("We have seperated the review into tokens, and added a POS Tag:")
+        st.markdown( "**We have lemmatized and seperated the review into tokens, and added a POS Tag:**")
         lpos = lemmatize_and_pos_tag(input_review)
         st.write(lpos)
         st.write("==============================================================")
 
         st.write(" ")
-        st.write("We will now build n-grams and predict the sentiment")
+        st.markdown( "**We will now build 1 to 3 - grams and predict the sentiment**")
+        st.write("___________________________")
         sentiment = pipeline.predict([lpos])
-        st.write("Sentiment class (1 - very bad to 5 - very good): - " + str(sentiment[0]) + " - ")
+        st.markdown("Sentiment class (1 - very bad to 5 - very good):  - " + "**" + str(sentiment[0]) + "**" + " - ")        
+        #st.markdown( "**" + str(sentiment[0]) + "**")
+        #st.write("___________________________")
         sentiment_p = pipeline.predict_proba([lpos])
-        st.write("Probality for this class: " + str(np.round(100*sentiment_p[0][sentiment[0]-1],1)) + "%")        
+        st.write("Probability for this class: " + str(np.round(100*sentiment_p[0][sentiment[0]-1],1)) + "%")        
         st.write("==============================================================")
 
-        st.write("All sentiment class probabilities:")
+        st.markdown( "**All sentiment class probabilities:**")
         prframe = pd.DataFrame({"Class Probability" : sentiment_p[0]})
         prframe["Sentiment Class"] = [1,2,3,4,5]
         st.bar_chart(data=prframe, x= "Sentiment Class", y="Class Probability",  width=0, height=0, use_container_width=True)              
         st.write("==============================================================")
-        
-        st.write("Loading impacting n-grams")
 
+        st.write("Loading impacting tokens")
+        st.markdown( "**Most relevant tokens for prediction of this sentiment rating**")
         tok_coef = pd.DataFrame(
             {
                 "token": pipeline["vect"].get_feature_names_out()
@@ -385,9 +394,9 @@ if page == pages[4]:
         st.write(coefs[["CTR_Class_"+ str(sentiment[0])]].head(10))
 
         st.write("==============================================================")
-        st.write("Now let's have a look at all individual classes, and which tokens are contributing most to their probabilities")
+        st.markdown("**Now let's have a look at all individual classes, and which tokens are contributing most to their probabilities**")
         st.write("==============================================================")
-        st.write("Top 10 n-grams for all classes")
+        st.write("Top 10 tokens for all classes")
 
         for x in [1,2,3,4,5]:
             coefs = tok_coef[["CTR_Class_"+ str(x)]].loc[rel_toks]
@@ -395,7 +404,7 @@ if page == pages[4]:
             coefs=coefs.sort_values(by = "abs_val", ascending=False)
             st.write(coefs[["CTR_Class_"+ str(x)]].head(10))
             #st.write("Probability of this class")
-            st.write(np.sum(coefs[["CTR_Class_"+ str(x)]]))
+            #st.write(np.sum(coefs[["CTR_Class_"+ str(x)]]))
             st.write("==============================================================")
 
 ###########################################################
