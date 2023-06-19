@@ -121,7 +121,6 @@ if page == pages[2]:
     df_in["myear"] = df_in.review_date.apply(lambda x: datetime.strptime(x, "%Y-%m-%d").strftime("%Y-%m"))
     df_in["star_rating"] = df_in["star_rating"].apply(lambda x: int(x))
 
-    # to do: the legend of star rating needs to be sorted
     fig = px.line(df_in.groupby(["myear","star_rating"])["review_id"].count().reset_index().sort_values("myear"), x='myear', y="review_id", color="star_rating", title = "Reviews per rating class")
     st.plotly_chart(fig)
 
@@ -404,7 +403,7 @@ if page == pages[4]:
 
 ###########################################################
 ### part conclusion 
-if page == pages[4]:
+if page == pages[5]:
     st.header("Conclusion")
     st.write("This sentiment analysis projects’ most significant constraint was computational power. This limitation affected all members of the team. Since the modelling portion of the project was so computationally expensive, the dataset had to be significantly reduced. This reduction affected the accuracy of the models analyzed. ")
 
