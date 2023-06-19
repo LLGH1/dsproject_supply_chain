@@ -34,7 +34,7 @@ path_repo = os.getcwd() # path of the repo-folder. STREAMLT_APP is a subfolder o
 #########################################################################
 ### define side bar > table of content
 st.sidebar.title("Contents")
-pages =["Introduction","Data Exploration and cleansing", "Data Pre-processing, Modelling and Interpretation", "Visualization", "Interactive part - Get the Sentiment", "Conclusion"] # "Data Visualizations"
+pages =["Introduction","Data Exploration and cleansing", "Visualization", "Data Pre-processing, Modelling and Interpretation", "Interactive part - Get the Sentiment", "Conclusion"] # "Data Visualizations"
 page = st.sidebar.radio("Click the page",options = pages)
 
 #########################################################################
@@ -207,7 +207,7 @@ if page == pages[3]:
     st.write("Loading pre-processed data from "+ path_repo)  
     try:
         df_in = pd.read_pickle(path + "\data\processed\data_en3_3sentiments.pickle")
-        df_in = df_in.sample(frac=0.1)
+        df_in = df_in.sample(frac=0.01)
         st.write("Data loaded")
         st.write("==============================================================")
     except:
@@ -220,6 +220,7 @@ if page == pages[3]:
     df_in["myear"] = df_in.review_date.apply(lambda x: datetime.strptime(x, "%Y-%m-%d").strftime("%Y-%m"))
     df_in["star_rating"] = df_in["star_rating"].apply(lambda x: int(x))
 
+    # to do: the legend of star rating needs to be sorted
     fig = px.line(df_in.groupby(["myear","star_rating"])["review_id"].count().reset_index().sort_values("myear"), x='myear', y="review_id", color="star_rating", title = "Reviews per rating class")
     st.plotly_chart(fig)
 
@@ -234,7 +235,7 @@ if page == pages[3]:
     group_labels = ['Positive', 'Neutral', 'Negative']
 
     # Create distplot with custom bin_size
-    fig = ff.create_distplot(histdata, group_labels) # , show_hist=False
+    fig = ff.create_distplot(histdata, group_labels, bin_size = 200) # , show_hist=False
     fig.update_layout(title_text = "Distribution plot of text length and star sentiments")
     st.plotly_chart(fig)
 
